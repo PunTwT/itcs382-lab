@@ -13,6 +13,18 @@ public class Parcel {
         this.status = "NEW";
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void markStored() {
+        status = "STORED";
+    }
+
+    public void markPickedUp() {
+        status = "PICKED_UP";
+    }
+
     public String getCode() {
         return code;
     }
