@@ -1,6 +1,6 @@
 # Lab Report, Code Quality and Design Quality
 
-Repository URL:
+Repository URL: https://github.com/PunTwT/itcs382-lab.git
 
 ## Tools
 
@@ -8,9 +8,9 @@ Repository URL:
 | --- | --- |
 | JDK | 27.0.1.0.3 (Homebrew OpenJDK, used by Maven) |
 | Maven | 3.10.0 |
-| IDE | 1.141.0 |
+| IDE | VS Code 1.141.0 |
 | SonarQube for IDE | 6.2.0 |
-| AI tool and exact model | |
+| AI tool and exact model | Claude, Claude Sonnet 5.5 |
 
 ## Task 1. SonarQube on the starter code
 
@@ -143,26 +143,37 @@ P1,PICKED_UP
 | Number of classes, interfaces, enums and records | 1 | 9 |
 | SonarQube issues, total | 19 | 10 |
 | SonarQube issues, by rule | S106 x10, S2386 x4, S1220 x1, S1172 x1, S3776 x1, S3358 x1, S7467 x1 | S106 x6, S7467 x3, S1172 x1 |
-| AI review findings in Check 1 | | |
-| AI review findings in Check 2 | | |
-| Review output file in the reviews folder | | |
+| AI review findings in Check 1 | 9 | 5 |
+| AI review findings in Check 2 | 12 | 13 |
+| Review output file in the reviews folder | reviews/bikeshare-poor-review.md | reviews/bikeshare-good-review.md |
 
 4.1 Did SonarQube report any cohesion or coupling problem in bikeshare-poor? Quote the rule and the message if it did.
+- No. SonarQube reported no rule about cohesion or coupling in bikeshare-poor. The closest is java:S2386, "Make this member "protected"." (Main.java Ln 9 to 12), which flags the public static fields. This points to exposed data, but it does not say that Main does too many jobs or that its methods share global state. The other design-related rule is java:S3776, "Refactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed." (Ln 51). It measures how hard handle is to read, not what it is responsible for.
 
 4.2 Did the AI review tell the two versions apart? Give one finding for bikeshare-poor that does not appear for bikeshare-good.
+- Yes. The review of bikeshare-poor found weak cohesion and tight coupling, and the review of bikeshare-good found none of the serious kinds. Poor has 3 "Must fix" findings, and good has none. One finding only for bikeshare-poor is No. 16 (Main.java:36, 41, 44, 66-67, 100-101): common coupling, because ask, find and handle all read and change the same global state. The good review lists "common coupling: not found". Poor also has the logical cohesion of find and handle (Nos. 11 and 12), caused by the boolean flags.
 
 4.3 Which version would you rather extend with a new member type, such as a visitor who pays 4 baht per minute, and why?
+- I would extend bikeshare-good. A visitor who pays 4 baht per minute would be one new constant in the MemberType enum, such as VISITOR(4), because the enum holds its own fee rate and parse method. Menu and BikeShare would not need new fee logic. In bikeshare-poor, I would have to change the int codes, the nested ternary that parses the type (line 56), the ternary that picks the rate 2 or 3 (line 92) and the text written to the CSV (line 96). These places must agree with each other (connascence of algorithm and convention), so one missed edit gives a wrong fee. In bikeshare-good I would still update the prompt and error texts that name the member types (good review No. 8), but a mistake there only affects the displayed text.
 
 ## Task 5. Reflection
 
 5.1 What does SonarQube check, and what does it not check? Answer with examples from this lab.
+- SonarQube checks the code itself: probable bugs and code smells that a rule can match. In this lab it found an unclosed FileWriter (java:S2095), the string comparison with == (java:S4973), an unused import and field (java:S1128, java:S1068), an empty catch block (java:S108) and the nested ternary (java:S3358). It does not judge the design. It did not say that ParcelService does locker handling, fees, SMS, saving and printing in one class, that Parcel.status is a public field written by another class (content coupling), or that the size code 1/2/3 is shared by three classes (connascence of convention).
 
 5.2 When should you not trust the AI review? Give an example from this lab.
+- I should not trust the AI review without checking each finding against the code. In Task 2, finding 24 said that Main has strong coupling because it depends on three classes, but three is not many and Main needs Parcel to build the input, so I marked it wrong. The AI review of bikeshare-good also listed many "Note" findings, such as moving parseMinutes to static, that are weak. An AI can also give a wrong line number or a wrong course term, so I opened each file at the given line.
 
 5.3 What will you do differently in Project Phase 2 after this lab?
+- In Phase 2 I will run SonarQube first and fix its issues, then run the AI review for the design. I will check every AI finding at its line before I put it in the report. I will also use an enum instead of int or String codes, keep every field private, and avoid boolean flags that change what a method does. I will use the cohesion and coupling terms of the course while I design, not only when I review.
 
 ## AI usage declaration
 
 | AI tool and exact model | Purpose | Files or parts that it produced or changed | How you checked its output |
 | --- | --- | --- | --- |
-| | | | |
+| Claude, Claude Sonnet 5.5 | Task 2: Prompt A review of the starter code | reviews/parcelpoint-review.md; findings in Table 2 and answers 2.1 to 2.3 | Opened each file at the line the AI gave, marked each finding yes or no with a reason, and compared with the SonarQube rows |
+| Claude, Claude Sonnet 5.5 | Task 3: suggested the fixes and the two design changes | ParcelService.java, Parcel.java, Main.java in parcelpoint (commits 0877b34, 575be1b, 97a3686, 3136268) | Ran mvn package and the program after each fix, checked that the SonarQube issues disappeared, and compared the output and parcels.csv with the expected result |
+| Claude, Claude Sonnet 5.5 | Task 4: Prompt B, generated the poor design | bikeshare-poor/pom.xml and bikeshare-poor/src/main/java/bikeshare/Main.java | Ran mvn package and the program, and checked that the design matches the prompt (public static fields, int codes, boolean flag) |
+| Claude, Claude Sonnet 5.5 | Task 4: Prompt C, generated the good design | All files in bikeshare-good (pom.xml and 9 Java files) | Ran mvn package and the program, and checked that the classes, enum and interface match the prompt.|
+| Claude, Claude Sonnet 5.5 | Task 4: Prompt A review of both versions | reviews/bikeshare-poor-review.md, reviews/bikeshare-good-review.md | Opened the code at the given lines and counted the findings per check. Used them for 4.1 to 4.3 |
+| Claude, Claude Sonnet 5.5 | Help with the setup, Table 1 and the report answers (4.1 to 4.3, Task 5) | Wording of LAB_REPORT.md; no program code except the Task 3 fixes | Checked each number against the Problems panel, the review files and my own code, and changed the text where it did not match |
