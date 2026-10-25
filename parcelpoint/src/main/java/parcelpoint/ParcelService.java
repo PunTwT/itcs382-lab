@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.UncheckedIOException;
+import java.util.Collections;
 
 public class ParcelService {
     private List<Locker> lockers = new ArrayList<>();
@@ -17,7 +18,11 @@ public class ParcelService {
     }
 
     public List<Locker> getLockers() {
-        return lockers;
+        return Collections.unmodifiableList(lockers);
+    }
+
+    public long freeLockerCount() {
+        return lockers.stream().filter(Locker::isFree).count();
     }
 
     public Locker storeParcel(Parcel parcel) {
