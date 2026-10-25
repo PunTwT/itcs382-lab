@@ -91,21 +91,45 @@ Table 3. What you did with each SonarQube issue in Table 1
 
 | No. in Table 1 | Fixed or kept | Commit, or the reason for keeping it |
 | --- | --- | --- |
-| 1 | | |
+| 1 | Kept | Command-line program, printing is its output |
+| 2 | Kept | Command-line program, printing is its output |
+| 3 | Kept | Command-line program, printing is its output |
+| 4 | Kept | Command-line program, printing is its output |
+| 5 | Fixed | 0877b34 |
+| 6 | Fixed | 0877b34 |
+| 7 | Fixed | 0877b34 |
+| 8 | Kept | The SMS is simulated by printing a message to the console |
+| 9 | Fixed | 575be1b |
+| 10 | Kept | Console listing for staff, printing is the purpose of the method |
+| 11 | Kept | Console listing for staff, printing is the purpose of the method |
+| 12 | Fixed | 97a3686 |
+| 13 | Fixed | 97a3686 |
 
-Number of SonarQube issues that remain after your fixes:
+Number of SonarQube issues that remain after your fixes: 7
 
 The two design problems that you fixed
 
 | Design problem (course term) | What you changed | Commit |
 | --- | --- | --- |
-| | | |
-| | | |
+| Public field written by another class (content coupling) | Made Parcel.status private and added getStatus, markStored and markPickedUp | 97a3686 |
+| Internal collection returned to callers, and Main reaching through the service (strong coupling) | getLockers returns an unmodifiable list, and a new freeLockerCount method replaces the stream in Main | 3136268 |
 
 Output of the program after your fixes, for the commands `store P1 6501 2`, `pickup P1 5` and `staff`, and the content of parcels.csv:
 
 ```text
+Commands: store <code> <studentId> <size 1-3>, pickup <code> <days>, list, staff, quit
+store P1 6501 2
+pickup P1 5
+staff
+SMS to 6501: parcel P1 is in locker 2
+Locker 2
+Fee: 30.0
+P1 6501 PICKED_UP
+Free lockers: 3
+quit
 
+parcels.csv:
+P1,PICKED_UP
 ```
 
 ## Task 4. AI-generated poor and good designs
